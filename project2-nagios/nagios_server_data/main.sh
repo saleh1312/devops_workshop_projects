@@ -38,8 +38,7 @@ send "12345\r"
 expect eof
 EOF
 
-cd /usr/local/nagios/etc/
-sudo mkdir servers
-sudo cp /vagrant/nagios_server_data/mc01.cfg servers/
-sudo sed -i 's/^#cfg_dir=\/usr\/local\/nagios\/etc\/servers/cfg_dir=\/usr\/local\/nagios\/etc\/servers/' nagios.cfg
+
+sudo cp -r /vagrant/nagios_server_data/servers /usr/local/nagios/etc/
+sudo sed -i 's/^#cfg_dir=\/usr\/local\/nagios\/etc\/servers/cfg_dir=\/usr\/local\/nagios\/etc\/servers/' /usr/local/nagios/etc/nagios.cfg
 sudo systemctl reload nagios.service
