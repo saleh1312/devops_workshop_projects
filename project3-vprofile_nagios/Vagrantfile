@@ -3,7 +3,7 @@ Vagrant.configure("2") do |config|
     config.hostmanager.manage_host = true
 
     # Function to configure clients for NRPE and monitoring
-    def configure_client(config, name, ip, memory, clinet_script_path)
+    def configure_client(config, name, ip, memory, clinet_script_path, is_client = true)
         config.vm.define name do |client|
 
             client.vm.box = "eurolinux-vagrant/centos-stream-9"
@@ -15,8 +15,9 @@ Vagrant.configure("2") do |config|
         
             # Install and configure NRPE
             client.vm.provision "shell", path: clinet_script_path
-            client.vm.provision "shell", path: "./common/install_nagios_client.sh"
-
+            if is_client
+                client.vm.provision "shell", path: "./common/install_nagios_client.sh"
+            end
         end
     end
     
@@ -33,19 +34,10 @@ Vagrant.configure("2") do |config|
 ### tomcat vm ###
     configure_client(config, "app01", "192.168.56.12", 4200, "./app01_data/main.sh")
 
-### Nginx VM ###
+### tomcat vm ###
     configure_client(config, "web02", "192.168.56.11", 800, "./web02_data/main.sh")
 
-
 ### NAGIOS SERVER VM ###
-    config.vm.define "nagiosserver" do |nagiosserver|
-        nagiosserver.vm.box = "bento/ubuntu-20.04"
-        nagiosserver.vm.hostname = "nagiosserver"
-        nagiosserver.vm.network "private_network", ip: "192.168.56.10"
-        nagiosserver.vm.provision "shell", path: "./nagios_server_data/main.sh"
-        nagiosserver.vm.boot_timeout = 1200
-        nagiosserver.vm.provider "virtualbox" do |vb|
-            vb.memory = 1024
-        end
-    end
+    configure_client(config, "nagiosserver", "192.168.56.10", 1024, "./nagios_server_data/main.sh", false)
+
 end
