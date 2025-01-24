@@ -15,6 +15,11 @@ sudo systemctl daemon-reload
 sudo systemctl start tomcat
 sudo systemctl enable --now tomcat
 
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
+sudo firewall-cmd --reload
 
 git clone -b main https://github.com/hkhcoder/vprofile-project.git
 cd vprofile-project
@@ -29,5 +34,3 @@ sudo rm -rf /usr/local/tomcat/webapps/ROOT
 sudo cp target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
 sudo chown tomcat:tomcat /usr/local/tomcat/webapps/ROOT.war
 
-
-sudo systemctl start tomcat
