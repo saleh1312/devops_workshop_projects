@@ -1,11 +1,8 @@
 #!/bin/bash
 
 sudo -i 
-
-# updating Install EPEL release and Memcached
-echo "updating  and Installing EPEL release and Memcached..."
-yum update -y
-dnf install epel-release -y
+# Install EPEL release and Memcached
+echo "Installing EPEL release and Memcached..."
 dnf install memcached -y
 
 # Start and enable Memcached service
@@ -28,4 +25,9 @@ firewall-cmd --add-port=11211/tcp
 firewall-cmd --runtime-to-permanent
 firewall-cmd --add-port=11111/udp
 firewall-cmd --runtime-to-permanent
+
+# Start Memcached with specific port settings
+echo "Starting Memcached on port 11211 (TCP) and 11111 (UDP)..."
 memcached -p 11211 -U 11111 -u memcached -d
+
+echo "Memcached setup is complete."

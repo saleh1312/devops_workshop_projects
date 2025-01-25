@@ -1,20 +1,20 @@
 #!/bin/bash
 
 sudo -i 
-
 # Install wget and RabbitMQ
 echo "Installing wget and RabbitMQ..."
-yum update -y
-yum install epel-release -y
 yum install wget -y
 cd /tmp/
 dnf -y install centos-release-rabbitmq-38
 dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
+
+# Start and enable RabbitMQ service
+echo "Starting and enabling RabbitMQ service..."
 systemctl enable --now rabbitmq-server
 
 # Setup access to user 'test' and make it admin
 echo "Configuring RabbitMQ user 'test'..."
-sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
+sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
 rabbitmqctl add_user test test
 rabbitmqctl set_user_tags test administrator
 
@@ -32,3 +32,5 @@ echo "Starting RabbitMQ service..."
 systemctl start rabbitmq-server
 systemctl enable rabbitmq-server
 systemctl status rabbitmq-server
+
+echo "RabbitMQ setup is complete."

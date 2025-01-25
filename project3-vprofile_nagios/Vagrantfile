@@ -14,9 +14,9 @@ Vagrant.configure("2") do |config|
             end
         
             # Install and configure NRPE
-            client.vm.provision "shell", path: clinet_script_path
+            client.vm.provision "shell", path: clinet_script_path, privileged: true
             if is_client
-                client.vm.provision "shell", path: "./common/install_nagios_client.sh"
+                client.vm.provision "shell", path: "./common/install_nagios_client.sh", privileged: true
             end
         end
     end
