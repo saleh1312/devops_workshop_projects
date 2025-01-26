@@ -1,36 +1,96 @@
-sudo yum update -y
-sudo yum install epel-release -y
-sudo dnf -y install java-11-openjdk java-11-openjdk-devel
-sudo sudo dnf install git maven wget -y
+#!/bin/bash
+
+# Run as root
+sudo -i
+
+# Install Java, Git, Maven, and Wget
+echo "Installing Java, Git, Maven, and Wget..."
+dnf -y install java-11-openjdk java-11-openjdk-devel git maven wget
+
+# Change to /tmp directory
+echo "Changing directory to /tmp..."
 cd /tmp/
-sudo wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.75/bin/apache-tomcat-9.0.75.tar.gz
-sudo tar xzvf apache-tomcat-9.0.75.tar.gz
-sudo useradd --home-dir /usr/local/tomcat --shell /sbin/nologin tomcat
-sudo cp -r /tmp/apache-tomcat-9.0.75/* /usr/local/tomcat/
-sudo chown -R tomcat.tomcat /usr/local/tomcat
 
-sudo cp /vagrant/app01_data/tomcat.service /etc/systemd/system/tomcat.service
+# Download and extract Tomcat package
+echo "Downloading and extracting Tomcat package..."
+wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.75/bin/apache-tomcat-9.0.75.tar.gz
+tar xzvf apache-tomcat-9.0.75.tar.gz
 
-sudo systemctl daemon-reload
-sudo systemctl start tomcat
-sudo systemctl enable --now tomcat
+# Add tomcat user
+echo "Adding tomcat user..."
+useradd --home-dir /usr/local/tomcat --shell /sbin/nologin tomcat
 
-sudo systemctl start firewalld
-sudo systemctl enable firewalld
-sudo firewall-cmd --get-active-zones
-sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
-sudo firewall-cmd --reload
+# Copy data to tomcat home directory
+echo "Copying data to Tomcat home directory..."
+mkdir -p /usr/local/tomcat
+cp -r /tmp/apache-tomcat-9.0.75/* /usr/local/tomcat/
 
+# Make tomcat user owner of tomcat home directory
+echo "Making tomcat user owner of Tomcat home directory..."
+chown -R tomcat:tomcat /usr/local/tomcat
+
+# Create tomcat systemd service file
+echo "Creating tomcat systemd service file..."
+cat <<EOL > /etc/systemd/system/tomcat.service
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=network.target
+
+[Service]
+Type=forking
+
+User=tomcat
+Group=tomcat
+Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk"
+Environment="CATALINA_PID=/usr/local/tomcat/temp/tomcat.pid"
+Environment="CATALINA_HOME=/usr/local/tomcat"
+Environment="CATALINA_BASE=/usr/local/tomcat"
+Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom"
+
+ExecStart=/usr/local/tomcat/bin/startup.sh
+ExecStop=/usr/local/tomcat/bin/shutdown.sh
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+# Reload systemd files and start & enable tomcat service
+echo "Reloading systemd files and starting & enabling tomcat service..."
+systemctl daemon-reload
+systemctl start tomcat
+systemctl enable tomcat
+
+# Enabling the firewall and allowing port 8080 to access Tomcat
+echo "Enabling the firewall and allowing port 8080 to access Tomcat..."
+systemctl start firewalld
+systemctl enable firewalld
+firewall-cmd --zone=public --add-port=8080/tcp --permanent
+firewall-cmd --reload
+
+# Code build & deploy
+# Download source code
+echo "Downloading source code..."
+cd /home/vagrant
 git clone -b main https://github.com/hkhcoder/vprofile-project.git
+
+# Update configuration
+echo "Updating configuration..."
 cd vprofile-project
+sed -i 's|backend.server.url=.*|backend.server.url=http://db01:3306|' src/main/resources/application.properties
 
-mvn install
+# Build code
+echo "Building code..."
+mvn clean install
 
-sudo systemctl stop tomcat
+# Deploy artifact
+echo "Deploying artifact..."
+systemctl stop tomcat
+rm -rf /usr/local/tomcat/webapps/ROOT*
+cp target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
+chown -R tomcat:tomcat /usr/local/tomcat/webapps
+systemctl start tomcat
 
-sudo dnf remove -y java-17-openjdk java-17-openjdk-headless java-17-openjdk-devel
-
-sudo rm -rf /usr/local/tomcat/webapps/ROOT
-sudo cp target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
-sudo chown tomcat:tomcat /usr/local/tomcat/webapps/ROOT.war
-
+echo "Tomcat setup and deployment is complete."

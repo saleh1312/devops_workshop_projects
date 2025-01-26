@@ -17,7 +17,7 @@ systemctl enable mariadb
 echo "Securing MariaDB..."
 expect /vagrant/db01_data/mysql_secure_install.exp
 
-# mysql -u root < /vagrant/db01_data/set_db_pass.sql
+mysql -u root < /vagrant/db01_data/set_db_pass.sql
 
 # Configure MariaDB: Create database and user
 echo "Configuring MariaDB database and user..."
