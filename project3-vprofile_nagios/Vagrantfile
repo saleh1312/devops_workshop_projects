@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
             client.vm.box = "eurolinux-vagrant/centos-stream-9"
             client.vm.hostname = name
             client.vm.network "private_network", ip: ip
+            client.vm.boot_timeout = 1500
             client.vm.provider "virtualbox" do |vb|
                     vb.memory = memory
             end
