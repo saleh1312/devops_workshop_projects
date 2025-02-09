@@ -4,15 +4,17 @@ import ssl
 # Amazon MQ credentials
 RABBITMQ_USERNAME = "test"
 RABBITMQ_PASSWORD = "test123456789"
-BROKER_URL = "amqps://b-14b244d4-7a9d-49b5-9bd1-bfab831adc4f.mq.us-east-1.amazonaws.com"
+BROKER_HOST = "rmq01.vprof"
 
 # Use SSL for secure connection
 context = ssl.create_default_context()
+context.check_hostname = False  # Disable hostname verification
+context.verify_mode = ssl.CERT_NONE  # Disable certificate verification (Not recommended for production)
 ssl_options = pika.SSLOptions(context)
 
 # Connect to RabbitMQ
 connection_params = pika.ConnectionParameters(
-    host=BROKER_URL,
+    host=BROKER_HOST,
     port=5671,  # Use 5671 for AMQPS (secure)
     virtual_host="/",
     credentials=pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD),
@@ -20,6 +22,8 @@ connection_params = pika.ConnectionParameters(
 )
 
 connection = pika.BlockingConnection(connection_params)
+
+print( connection.is_open )
 channel = connection.channel()
 
 # Declare a queue

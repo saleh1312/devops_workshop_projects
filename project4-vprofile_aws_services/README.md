@@ -30,4 +30,6 @@
     (domain = rmq01.vprof)
 
 4- run rmq_config.sh
-5- run test_rmq.py to test connection
+5- copy rmq endpoint and remove (port -> in the end) and (amqps:// -> in the begining)
+    and put it in BROKER_HOST in test_rmq.py
+6- run test_rmq.py to test connection
