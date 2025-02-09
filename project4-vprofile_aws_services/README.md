@@ -33,3 +33,12 @@
 5- copy rmq endpoint and remove (port -> in the end) and (amqps:// -> in the begining)
     and put it in BROKER_HOST in test_rmq.py
 6- run test_rmq.py to test connection
+
+
+## 
+1- creat ec2 (centos 9)
+2- sudo yum update 
+3- sudo yum install nano
+4- run tomcat_config.sh
+5- run app_setup.sh
+6- test application on publicip:8080

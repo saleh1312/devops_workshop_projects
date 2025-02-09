@@ -60,30 +60,3 @@ echo "Reloading systemd files and starting & enabling tomcat service..."
 systemctl daemon-reload
 systemctl start tomcat
 systemctl enable tomcat
-
-
-
-# Code build & deploy
-# Download source code
-echo "Downloading source code..."
-cd /home/vagrant
-git clone -b main https://github.com/hkhcoder/vprofile-project.git
-
-# Update configuration
-echo "Updating configuration..."
-cd vprofile-project
-sed -i 's|backend.server.url=.*|backend.server.url=http://db01:3306|' src/main/resources/application.properties
-
-# Build code
-echo "Building code..."
-mvn clean install
-
-# Deploy artifact
-echo "Deploying artifact..."
-systemctl stop tomcat
-rm -rf /usr/local/tomcat/webapps/ROOT*
-cp target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
-chown -R tomcat:tomcat /usr/local/tomcat/webapps
-systemctl start tomcat
-
-echo "Tomcat setup and deployment is complete."
