@@ -3,13 +3,15 @@ Vagrant.configure("2") do |config|
     config.hostmanager.manage_host = true
 
     # Function to configure clients for NRPE and monitoring
-    def configure_client(config, name, ip, memory, client_script_path = nil)
+    def configure_client(config, name, ip, memory, vcpu, client_script_path = nil)
         config.vm.define name do |client|
             client.vm.box = "bento/ubuntu-22.04"
             client.vm.hostname = name
             client.vm.network "private_network", ip: ip
+            client.vm.boot_timeout = 1200
             client.vm.provider "virtualbox" do |vb|
                 vb.memory = memory
+                vb.cpus = vcpu
             end
         
             # Install and configure NRPE if a script path is provided
@@ -20,12 +22,12 @@ Vagrant.configure("2") do |config|
     end
     
     ### Master VM ###
-    configure_client(config, "mastervm", "192.168.56.15", 4096, "./db01_data/main.sh")
+    configure_client(config, "mastervm", "10.0.2.15", 4096, 4, "./control_plane.sh")
 
     ### Control 1 ###
-    configure_client(config, "control1", "192.168.56.14", 2048, "./mc01_data/main.sh")
+    configure_client(config, "control1", "10.0.2.14", 2048, 2)
 
     ### Control 2 ###
-    configure_client(config, "control2", "192.168.56.13", 2048, "./rmq01_data/main.sh")
+    configure_client(config, "control2", "10.0.2.13", 2048, 2)
 
 end
