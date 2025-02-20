@@ -22,12 +22,12 @@ Vagrant.configure("2") do |config|
     end
     
     ### Master VM ###
-    configure_client(config, "mastervm", "10.0.2.15", 4096, 4, "./control_plane.sh")
+    configure_client(config, "controlplane", "10.0.0.10", 4096, 4, "./control_plane.sh")
 
     ### Control 1 ###
-    configure_client(config, "control1", "10.0.2.14", 2048, 2)
+    configure_client(config, "node01", "10.0.0.11", 2048, 2, "./worker.sh")
 
     ### Control 2 ###
-    configure_client(config, "control2", "10.0.2.13", 2048, 2)
+    configure_client(config, "node02", "10.0.0.12", 2048, 2, "./worker.sh")
 
 end
