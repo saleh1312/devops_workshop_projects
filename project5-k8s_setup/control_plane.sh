@@ -54,24 +54,22 @@ sudo systemctl enable --now kubelet
 
 
 # #### create cluster
-sudo kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock
+kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock
 
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
+export KUBECONFIG="/etc/kubernetes/admin.conf"
 
 ### install calico
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico.yaml -O
 
-sudo kubectl apply -f calico.yaml
+kubectl apply -f calico.yaml
 
 
-sudo kubeadm token create --print-join-command > /vagrant/join.sh
-sudo chmod +x /vagrant/join.sh
+kubeadm token create --print-join-command > /vagrant/join.sh
+chmod +x /vagrant/join.sh
+sed -i 's|^kubeadm join|sudo kubeadm join|' /vagrant/join.sh
+sed -i '1s|$| --cri-socket=unix:///var/run/cri-dockerd.sock|' /vagrant/join.sh
 
-sudo sed -i 's|^kubeadm join|sudo kubeadm join|' /vagrant/join.sh
 
-sudo sed -i '1s|$| --cri-socket=unix:///var/run/cri-dockerd.sock|' /vagrant/join.sh
-
-# # kubectl get pods --all-namespaces
+# sudo -i
+# export KUBECONFIG="/etc/kubernetes/admin.conf"
+# kubectl get nodes
