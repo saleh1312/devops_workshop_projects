@@ -52,5 +52,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
+sudo apt-mark hold kubelet kubeadm kubectl
+
 # join
-sudo sh /vagrant/join.sh
+# sh /vagrant/join.sh

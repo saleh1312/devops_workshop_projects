@@ -1,10 +1,15 @@
 #!/bin/bash
 
-sudo systemctl stop ufw
-sudo systemctl disable ufw
 
 ### disable swap 
 sudo swapoff -a
+
+
+
+sudo systemctl stop ufw
+sudo systemctl disable ufw
+
+
 
 
 ### Enable IPv4 packet forwarding 
@@ -52,22 +57,31 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
+sudo apt-mark hold kubelet kubeadm kubectl
 
-# #### create cluster
-kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock
+kubeadm config images pull --cri-socket=unix:///var/run/cri-dockerd.sock
 
-export KUBECONFIG="/etc/kubernetes/admin.conf"
+# # #### create cluster
+# # kubeadm config print init-defaults > /vagrant/k8s_init_file.yml
+# # adn then edit this file with ports and cidr and systemd
+# kubeadm init --config /vagrant/k8s_init_file.yml
 
-### install calico
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico.yaml -O
+# cd /home
+# export KUBECONFIG="/etc/kubernetes/admin.conf"
 
-kubectl apply -f calico.yaml
+# echo 'KUBECONFIG="/etc/kubernetes/admin.conf"' | sudo tee -a /etc/environment
+# source /etc/environment
 
 
-kubeadm token create --print-join-command > /vagrant/join.sh
-chmod +x /vagrant/join.sh
-sed -i 's|^kubeadm join|sudo kubeadm join|' /vagrant/join.sh
-sed -i '1s|$| --cri-socket=unix:///var/run/cri-dockerd.sock|' /vagrant/join.sh
+# # ### install calico
+# curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico.yaml -O
+
+# kubectl apply -f calico.yaml
+
+
+# kubeadm token create --print-join-command > /vagrant/join.sh
+# chmod +x /vagrant/join.sh
+# sed -i '1s|$| --cri-socket=unix:///var/run/cri-dockerd.sock|' /vagrant/join.sh
 
 
 # sudo -i
